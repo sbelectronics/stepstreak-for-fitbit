@@ -29,7 +29,14 @@ not sure whether this is an error in my importer, or a problem with fitbit's exp
 The source for this is in cmd/fitbit-stepstreak. Execute the command like this, assuming "exports" is where you put all your CSV files:
 
 ```bash
-bin/fitbit-stepstreak exports/*.csv
+# If you're running Linux
+
+linux/fitbit-stepstreak exports/*.csv
+
+# If you're running Windows (don't include the wildcard; program will look for *.CSV in the directory you provide
+# ... do make sure to include the trailing backslash)
+
+windows\fitbit-stepstreak exports\
 ```
 
 It will write output to the console like this:
