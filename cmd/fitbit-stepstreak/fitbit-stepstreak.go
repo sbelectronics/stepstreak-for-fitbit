@@ -105,36 +105,14 @@ func readCsvFile(fn string) {
 			activity.MinuteVery, err = readUint32(rec[8])
 			activity.ActivityCalories, err = readUint32(rec[9])
 
-			Activities[activity.Date] = activity
+			alreadyAct, okay := Activities[activity.Date]
+			if !okay || activity.Steps >= alreadyAct.Steps {
+				// If we already have one, use whichever has the biggest step count
+				Activities[activity.Date] = activity
+			}
 		}
 	}
 }
-
-/*
-type jsonEntry struct {
-	date string `json:"name"`
-	value uint32 `json:"value"`
-}
-
-type jsonData []jsonEntry
-
-func readJsonFile(fn string) error {
-	content, err := io.ReadFile(fn)
-	if err != nil {
-		return err
-	}
-
-	var payload jsonData
-	err = json.Unmarshal(content, &payload)
-	if err != nil {
-		return err
-	}
-
-	for _, entry := range jsonData {
-	    date, err := time.Parse("1/2/06", jsonData.)
-	}
-}
-*/
 
 type TimeSlice []time.Time
 
@@ -189,17 +167,7 @@ func main() {
 	// read the imported archive, MyFitbitData, first.
 	for _, fnparam := range flag.Args() {
 		for _, fn := range dirExpand(fnparam) {
-			if strings.Contains(fn, "MyFitbitData") {
-				readCsvFile(fn)
-			}
-		}
-	}
-
-	for _, fnparam := range flag.Args() {
-		for _, fn := range dirExpand(fnparam) {
-			if !strings.Contains(fn, "MyFitbitData") {
-				readCsvFile(fn)
-			}
+			readCsvFile(fn)
 		}
 	}
 
