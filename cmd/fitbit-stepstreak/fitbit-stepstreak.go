@@ -150,6 +150,31 @@ func (p TimeSlice) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
+// because windows is lame.
+func dirExpand(fnparam string) []string {
+	result := []string{}
+	if !strings.HasSuffix(fnparam, "\\") && !strings.HasSuffix(fnparam, "/") {
+		result = append(result, fnparam)
+		return result
+	}
+
+	entries, err := os.ReadDir(fnparam + ".")
+	if err != nil {
+		log.Fatal("Failed in directory read of %s: %v", fnparam, err)
+	}
+	for _, entry := range entries {
+		if entry.Name()[0] == '.' {
+			continue
+		}
+		if !strings.Contains(strings.ToLower(entry.Name()), ".csv") {
+			continue
+		}
+		result = append(result, fnparam+entry.Name())
+	}
+
+	return result
+}
+
 func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
@@ -161,15 +186,20 @@ func main() {
 
 	Activities = map[time.Time]Activity{}
 
-	for _, fn := range flag.Args() {
-		if strings.Contains(fn, "MyFitbitData") {
-			readCsvFile(fn)
+	// read the imported archive, MyFitbitData, first.
+	for _, fnparam := range flag.Args() {
+		for _, fn := range dirExpand(fnparam) {
+			if strings.Contains(fn, "MyFitbitData") {
+				readCsvFile(fn)
+			}
 		}
 	}
 
-	for _, fn := range flag.Args() {
-		if !strings.Contains(fn, "MyFitbitData") {
-			readCsvFile(fn)
+	for _, fnparam := range flag.Args() {
+		for _, fn := range dirExpand(fnparam) {
+			if !strings.Contains(fn, "MyFitbitData") {
+				readCsvFile(fn)
+			}
 		}
 	}
 
